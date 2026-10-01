@@ -1,0 +1,115 @@
+:root {
+  color-scheme: light;
+  --app-bg: #f5f6f8;
+  --app-header: #1a1a2e;
+  --app-accent: #e94560;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-height: 64px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--app-bg);
+  font-family:
+    'SF Pro Text',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--app-header);
+  color: #fff;
+  padding: calc(12px + var(--safe-top)) 0 12px;
+}
+
+.app-brand {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.app-main {
+  flex: 1;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.app-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  min-height: calc(var(--nav-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.app-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.95rem;
+  min-height: var(--nav-height);
+}
+
+.app-nav-link.is-active {
+  color: var(--app-accent);
+}
+
+.touch-btn {
+  min-height: 52px;
+  font-weight: 600;
+}
+
+.touch-btn-sm {
+  min-height: 40px;
+  min-width: 72px;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--app-accent);
+  --bs-btn-border-color: var(--app-accent);
+  --bs-btn-hover-bg: #d63851;
+  --bs-btn-hover-border-color: #d63851;
+  --bs-btn-active-bg: #c32f47;
+  --bs-btn-active-border-color: #c32f47;
+}
+
+.exercise-list .list-group-item {
+  background: transparent;
+  border-color: #e5e7eb;
+}
