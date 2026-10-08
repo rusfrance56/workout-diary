@@ -80,14 +80,16 @@ export class BackupService {
 
     await db.transaction(
       'rw',
-      db.exercises,
-      db.programs,
-      db.templates,
-      db.templateExercises,
-      db.workouts,
-      db.workoutExercises,
-      db.workoutSets,
-      db.settings,
+      [
+        db.exercises,
+        db.programs,
+        db.templates,
+        db.templateExercises,
+        db.workouts,
+        db.workoutExercises,
+        db.workoutSets,
+        db.settings,
+      ],
       async () => {
         await Promise.all([
           db.workoutSets.clear(),

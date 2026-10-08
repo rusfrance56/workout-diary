@@ -12,10 +12,12 @@ import { StartWorkoutPage } from '../pages/StartWorkoutPage';
 import { TemplateDetailPage } from '../pages/TemplateDetailPage';
 import { WorkoutExercisePage } from '../pages/WorkoutExercisePage';
 
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, '') || undefined;
+
 export function App() {
   return (
     <SettingsProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={routerBasename}>
         <Routes>
           <Route element={<AppLayout />}>
             <Route index element={<HomePage />} />
