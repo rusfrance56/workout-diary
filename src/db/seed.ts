@@ -5,45 +5,53 @@ import type { WorkoutDiaryDB } from './database';
 import { db } from './database';
 
 /** Демо-кадры из free-exercise-db (Unlicense), лежат в public/exercises. */
-const SEED_IMAGES: Record<string, string> = {
-  'Жим лёжа': '/exercises/bench-press.jpg',
-  'Жим гантелей лёжа': '/exercises/dumbbell-bench.jpg',
-  'Отжимания': '/exercises/push-up.jpg',
-  'Разведения гантелей лёжа': '/exercises/dumbbell-fly.jpg',
-  'Подтягивания': '/exercises/pull-up.jpg',
-  'Тяга верхнего блока': '/exercises/lat-pulldown.jpg',
-  'Тяга штанги в наклоне': '/exercises/barbell-row.jpg',
-  'Тяга гантели в наклоне': '/exercises/dumbbell-row.jpg',
-  'Шраги': '/exercises/shrug.jpg',
-  'Гиперэкстензия': '/exercises/hyperextension.jpg',
-  'Жим стоя': '/exercises/ohp.jpg',
-  'Махи гантелями в стороны': '/exercises/lateral-raise.jpg',
-  'Разведения в наклоне': '/exercises/reverse-fly.jpg',
-  'Сгибания на бицепс': '/exercises/bicep-curl.jpg',
-  'Молотковые сгибания': '/exercises/hammer-curl.jpg',
-  'Разгибания на трицепс': '/exercises/tricep-ext.jpg',
-  'Отжимания на брусьях': '/exercises/dips.jpg',
-  'Скручивания': '/exercises/crunch.jpg',
-  'Планка': '/exercises/plank.jpg',
-  'Приседания': '/exercises/squat.jpg',
-  'Становая тяга': '/exercises/deadlift.jpg',
-  'Жим ногами': '/exercises/leg-press.jpg',
-  'Выпады': '/exercises/lunge.jpg',
-  'Сгибания ног': '/exercises/leg-curl.jpg',
-  'Разгибания ног': '/exercises/leg-extension.jpg',
-  'Ягодичный мост': '/exercises/hip-thrust.jpg',
-  'Подъёмы на носки': '/exercises/calf-raise.jpg',
-  'Сведения ног': '/exercises/adductor.jpg',
-  'Разведения ног': '/exercises/abductor.jpg',
+const SEED_IMAGE_FILES: Record<string, string> = {
+  'Жим лёжа': 'bench-press.jpg',
+  'Жим гантелей лёжа': 'dumbbell-bench.jpg',
+  'Отжимания': 'push-up.jpg',
+  'Разведения гантелей лёжа': 'dumbbell-fly.jpg',
+  'Подтягивания': 'pull-up.jpg',
+  'Тяга верхнего блока': 'lat-pulldown.jpg',
+  'Тяга штанги в наклоне': 'barbell-row.jpg',
+  'Тяга гантели в наклоне': 'dumbbell-row.jpg',
+  'Шраги': 'shrug.jpg',
+  'Гиперэкстензия': 'hyperextension.jpg',
+  'Жим стоя': 'ohp.jpg',
+  'Махи гантелями в стороны': 'lateral-raise.jpg',
+  'Разведения в наклоне': 'reverse-fly.jpg',
+  'Сгибания на бицепс': 'bicep-curl.jpg',
+  'Молотковые сгибания': 'hammer-curl.jpg',
+  'Разгибания на трицепс': 'tricep-ext.jpg',
+  'Отжимания на брусьях': 'dips.jpg',
+  'Скручивания': 'crunch.jpg',
+  'Планка': 'plank.jpg',
+  'Приседания': 'squat.jpg',
+  'Становая тяга': 'deadlift.jpg',
+  'Жим ногами': 'leg-press.jpg',
+  'Выпады': 'lunge.jpg',
+  'Сгибания ног': 'leg-curl.jpg',
+  'Разгибания ног': 'leg-extension.jpg',
+  'Ягодичный мост': 'hip-thrust.jpg',
+  'Подъёмы на носки': 'calf-raise.jpg',
+  'Сведения ног': 'adductor.jpg',
+  'Разведения ног': 'abductor.jpg',
 };
 
+function seedImageUrl(fileName: string): string {
+  return `${import.meta.env.BASE_URL}exercises/${fileName}`;
+}
+
+function isSeedCatalogImage(url: string | undefined): boolean {
+  return Boolean(url && url.includes('/exercises/'));
+}
+
 function resolveSeedImage(name: string, current?: string): string | undefined {
-  const fromSeed = SEED_IMAGES[name];
-  if (!fromSeed) {
+  const fileName = SEED_IMAGE_FILES[name];
+  if (!fileName) {
     return current;
   }
-  if (!current || current.startsWith('/exercises/')) {
-    return fromSeed;
+  if (!current || isSeedCatalogImage(current)) {
+    return seedImageUrl(fileName);
   }
   return current;
 }
