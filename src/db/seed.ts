@@ -48,7 +48,12 @@ function isSeedCatalogImage(url: string | undefined): boolean {
 function resolveSeedImage(name: string, current?: string): string | undefined {
   const fileName = SEED_IMAGE_FILES[name];
   if (!fileName) {
-    return current;
+    if (!current || !isSeedCatalogImage(current)) {
+      return current;
+    }
+    // Старый путь без base (/exercises/...) → с BASE_URL
+    const file = current.split('/').pop();
+    return file ? seedImageUrl(file) : current;
   }
   if (!current || isSeedCatalogImage(current)) {
     return seedImageUrl(fileName);

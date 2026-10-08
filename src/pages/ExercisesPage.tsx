@@ -6,6 +6,7 @@ import type { CreateExerciseInput, Exercise, MuscleGroup } from '../domain';
 import { formatMuscleGroups } from '../domain';
 import { MUSCLE_GROUP_LABELS, MUSCLE_GROUP_SECTIONS } from '../domain/labels';
 import { useExercises } from '../hooks/useExercises';
+import { resolveAssetUrl } from '../utils/assetUrl';
 import { fileToCompressedDataUrl } from '../utils/image';
 
 const EMPTY_FORM: CreateExerciseInput = {
@@ -298,7 +299,11 @@ export function ExercisesPage() {
                 {items.map((exercise) => (
                   <div key={exercise.id} className="apple-row align-items-center">
                     {exercise.imageDataUrl && (
-                      <img src={exercise.imageDataUrl} alt="" className="exercise-list-thumb" />
+                      <img
+                        src={resolveAssetUrl(exercise.imageDataUrl)}
+                        alt=""
+                        className="exercise-list-thumb"
+                      />
                     )}
                     <div className="flex-grow-1">
                       <div className="apple-row-title">{exercise.name}</div>

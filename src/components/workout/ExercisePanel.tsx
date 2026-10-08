@@ -5,6 +5,7 @@ import type { PreviousSetSuggestion } from '../../db/repositories/workoutReposit
 import { useSettingsContext } from '../../hooks/SettingsProvider';
 import { exerciseService } from '../../services/exerciseService';
 import { workoutService } from '../../services/workoutService';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 import { formatWeight, roundWeight } from '../../utils/weight';
 import { ExerciseAutocomplete } from '../ExerciseAutocomplete';
 import { SetEditorRow } from './SetEditorRow';
@@ -76,7 +77,7 @@ export function ExercisePanel({
       }
       setPrevious(prev);
       setCatalogNotes(exercise?.notes ?? '');
-      setCatalogImage(exercise?.imageDataUrl);
+      setCatalogImage(resolveAssetUrl(exercise?.imageDataUrl));
     })();
 
     return () => {

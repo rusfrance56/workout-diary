@@ -8,7 +8,16 @@ import { ensureProgramSeed } from './db/seed';
 import { applyTheme, readStoredTheme } from './utils/theme';
 
 applyTheme(readStoredTheme());
-registerSW({ immediate: true });
+registerSW({
+  immediate: true,
+  onRegisteredSW(_url, registration) {
+    if (!registration) {
+      return;
+    }
+    void registration.update();
+    setInterval(() => void registration.update(), 30 * 60 * 1000);
+  },
+});
 
 void ensureProgramSeed().finally(() => {
   createRoot(document.getElementById('root')!).render(

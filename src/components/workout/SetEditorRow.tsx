@@ -90,15 +90,6 @@ export function SetEditorRow({
       <div className="set-editor-num">{set.setNumber}</div>
 
       <div className="set-stepper">
-        <button
-          type="button"
-          className="set-stepper-btn"
-          disabled={locked || busy}
-          onClick={() => nudgeWeight(-weightStep)}
-          aria-label="Уменьшить вес"
-        >
-          −
-        </button>
         <div className="input-with-suffix">
           <input
             type="number"
@@ -116,27 +107,29 @@ export function SetEditorRow({
             {unitLabel}
           </span>
         </div>
-        <button
-          type="button"
-          className="set-stepper-btn"
-          disabled={locked || busy}
-          onClick={() => nudgeWeight(weightStep)}
-          aria-label="Увеличить вес"
-        >
-          +
-        </button>
+        <div className="set-stepper-btns">
+          <button
+            type="button"
+            className="set-stepper-btn"
+            disabled={locked || busy}
+            onClick={() => nudgeWeight(weightStep)}
+            aria-label="Увеличить вес"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            className="set-stepper-btn"
+            disabled={locked || busy}
+            onClick={() => nudgeWeight(-weightStep)}
+            aria-label="Уменьшить вес"
+          >
+            −
+          </button>
+        </div>
       </div>
 
       <div className="set-stepper">
-        <button
-          type="button"
-          className="set-stepper-btn"
-          disabled={locked || busy}
-          onClick={() => nudgeReps(-1)}
-          aria-label="Уменьшить повторы"
-        >
-          −
-        </button>
         <div className="input-with-suffix">
           <input
             type="number"
@@ -154,15 +147,26 @@ export function SetEditorRow({
             п
           </span>
         </div>
-        <button
-          type="button"
-          className="set-stepper-btn"
-          disabled={locked || busy}
-          onClick={() => nudgeReps(1)}
-          aria-label="Увеличить повторы"
-        >
-          +
-        </button>
+        <div className="set-stepper-btns">
+          <button
+            type="button"
+            className="set-stepper-btn"
+            disabled={locked || busy}
+            onClick={() => nudgeReps(1)}
+            aria-label="Увеличить повторы"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            className="set-stepper-btn"
+            disabled={locked || busy}
+            onClick={() => nudgeReps(-1)}
+            aria-label="Уменьшить повторы"
+          >
+            −
+          </button>
+        </div>
       </div>
 
       {set.completed ? (
@@ -175,8 +179,13 @@ export function SetEditorRow({
           ✓
         </button>
       ) : (
-        <button type="submit" className="btn btn-primary set-editor-action" disabled={disabled || busy}>
-          {busy ? '…' : 'Готово'}
+        <button
+          type="submit"
+          className="btn btn-primary set-editor-action"
+          disabled={disabled || busy}
+          aria-label="Готово"
+        >
+          {busy ? '…' : 'OK'}
         </button>
       )}
     </form>
