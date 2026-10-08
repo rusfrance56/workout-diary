@@ -1,7 +1,30 @@
 export type WeightUnit = 'kg' | 'lb';
 
+export type ThemeMode = 'light' | 'dark';
+
+/** Практичная таксономия как в Hevy/Strong / MusclesWorked. */
 export type MuscleGroup =
-  'chest' | 'back' | 'shoulders' | 'legs' | 'arms' | 'core' | 'fullBody' | 'other';
+  | 'chest'
+  | 'lats'
+  | 'upperBack'
+  | 'lowerBack'
+  | 'frontShoulders'
+  | 'sideShoulders'
+  | 'rearShoulders'
+  | 'biceps'
+  | 'triceps'
+  | 'forearms'
+  | 'abs'
+  | 'obliques'
+  | 'quads'
+  | 'hamstrings'
+  | 'glutes'
+  | 'calves'
+  | 'adductors'
+  | 'abductors'
+  | 'hipFlexors'
+  | 'neck'
+  | 'other';
 
 export type Equipment = 'barbell' | 'dumbbell' | 'machine' | 'cable' | 'bodyweight' | 'other';
 
@@ -15,12 +38,19 @@ export interface ProgressionRule {
 export interface Exercise {
   id: string;
   name: string;
-  muscleGroup: MuscleGroup;
-  equipment: Equipment;
+  primaryMuscleGroups: MuscleGroup[];
+  secondaryMuscleGroups: MuscleGroup[];
   notes?: string;
+  /** data URL (опционально) */
+  imageDataUrl?: string;
+  /** Для прогрессии, в UI не показывается */
   defaultIncrementKg: number;
   createdAt: string;
   updatedAt: string;
+  /** @deprecated старые записи */
+  muscleGroup?: MuscleGroup;
+  /** @deprecated старые записи */
+  equipment?: Equipment;
 }
 
 export interface WorkoutProgram {
@@ -40,16 +70,25 @@ export interface WorkoutTemplate {
   updatedAt: string;
 }
 
+/** Плановый подход в дне программы (вес/повторы как в тренировке). */
+export interface PlannedSet {
+  setNumber: number;
+  weightKg: number;
+  reps: number;
+}
+
 export interface WorkoutTemplateExercise {
   id: string;
   templateId: string;
   exerciseId: string;
   order: number;
+  /** Синхронизируется с plannedSets.length */
   targetSets: number;
   minReps: number;
   maxReps: number;
   targetRir?: number;
   progressionRule: ProgressionRule;
+  plannedSets: PlannedSet[];
   createdAt: string;
   updatedAt: string;
 }
@@ -71,6 +110,10 @@ export interface WorkoutExercise {
   exerciseId: string;
   order: number;
   exerciseNameSnapshot: string;
+  skipped?: boolean;
+  replacedFromName?: string;
+  /** Личные комментарии к упражнению в этой тренировке */
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -85,6 +128,13 @@ export interface WorkoutSet {
   rir?: number;
   rpe?: number;
   completed: boolean;
+  /** Момент нажатия «Готово» */
+  completedAt?: string;
+  /**
+   * Расчётный отдых до подхода (сек).
+   * Пачка быстрых «Готово» делит интервал поровну; свыше REST_MAX_SEC — не пишем.
+   */
+  restSeconds?: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -93,6 +143,7 @@ export interface WorkoutSet {
 export interface AppSettings {
   id: 'default';
   weightUnit: WeightUnit;
+  theme: ThemeMode;
   createdAt: string;
   updatedAt: string;
 }

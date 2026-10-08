@@ -22,11 +22,21 @@ export class ExerciseService {
     if (!name) {
       throw new Error('Название упражнения обязательно');
     }
+    if (!input.primaryMuscleGroups?.length) {
+      throw new Error('Выберите основные группы мышц');
+    }
+
+    const secondary = (input.secondaryMuscleGroups ?? []).filter(
+      (group) => !input.primaryMuscleGroups.includes(group),
+    );
 
     return this.repository.create({
       ...input,
       name,
+      primaryMuscleGroups: input.primaryMuscleGroups,
+      secondaryMuscleGroups: secondary,
       notes: input.notes?.trim() || undefined,
+      imageDataUrl: input.imageDataUrl || undefined,
       defaultIncrementKg: input.defaultIncrementKg > 0 ? input.defaultIncrementKg : 2.5,
     });
   }
@@ -40,6 +50,7 @@ export class ExerciseService {
       ...input,
       name: input.name?.trim(),
       notes: input.notes?.trim() || undefined,
+      imageDataUrl: input.imageDataUrl === '' ? undefined : input.imageDataUrl,
     });
   }
 

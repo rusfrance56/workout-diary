@@ -31,6 +31,37 @@ export function formatWeight(weightKg: number, unit: WeightUnit): string {
   return `${trimTrailingZeros(value)} ${unitLabel}`;
 }
 
+/** Единый вид: `50кг×12 · 70кг×10 · 80кг×6-6-5` */
+export function formatSetsCompact(
+  sets: Array<{ weightKg: number; reps: number }>,
+  unit: WeightUnit = 'kg',
+): string {
+  if (sets.length === 0) {
+    return '';
+  }
+
+  const groups: Array<{ weightKg: number; reps: number[] }> = [];
+  for (const set of sets) {
+    const last = groups[groups.length - 1];
+    if (last && last.weightKg === set.weightKg) {
+      last.reps.push(set.reps);
+    } else {
+      groups.push({ weightKg: set.weightKg, reps: [set.reps] });
+    }
+  }
+
+  const unitLabel = unit === 'kg' ? 'кг' : 'lb';
+  return groups
+    .map((group) => {
+      const value = trimTrailingZeros(kgToDisplay(group.weightKg, unit));
+      if (group.reps.length === 1) {
+        return `${value}${unitLabel}×${group.reps[0]}`;
+      }
+      return `${value}${unitLabel}×${group.reps.join('-')}`;
+    })
+    .join(' · ');
+}
+
 function trimTrailingZeros(value: number): string {
   return String(Number(value.toFixed(2)));
 }

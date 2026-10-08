@@ -35,8 +35,19 @@ export class WorkoutDiaryDB extends Dexie {
       settings: 'id',
     });
 
+    this.version(2).stores({
+      exercises: 'id, name, updatedAt',
+      programs: 'id, name, updatedAt',
+      templates: 'id, programId, order, updatedAt',
+      templateExercises: 'id, templateId, exerciseId, order, updatedAt',
+      workouts: 'id, templateId, startedAt, finishedAt, updatedAt',
+      workoutExercises: 'id, workoutId, exerciseId, order, updatedAt',
+      workoutSets: 'id, workoutExerciseId, setNumber, completed, updatedAt',
+      settings: 'id',
+    });
+
     this.on('populate', (transaction) => {
-      seedDatabase(transaction.db as WorkoutDiaryDB);
+      return seedDatabase(transaction.db as WorkoutDiaryDB);
     });
   }
 }

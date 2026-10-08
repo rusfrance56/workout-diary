@@ -1,25 +1,28 @@
 import type { CreateExerciseInput, Exercise, UpdateExerciseInput } from '../../domain';
+import { normalizeExercise } from '../../domain';
 import { createId, nowIso } from '../../utils/id';
 import { db } from '../database';
 import type { ExerciseRepository } from './exerciseRepository';
 
 export class DexieExerciseRepository implements ExerciseRepository {
   async getAll(): Promise<Exercise[]> {
-    return db.exercises.orderBy('name').toArray();
+    const items = await db.exercises.orderBy('name').toArray();
+    return items.map(normalizeExercise);
   }
 
   async getById(id: string): Promise<Exercise | undefined> {
-    return db.exercises.get(id);
+    const item = await db.exercises.get(id);
+    return item ? normalizeExercise(item) : undefined;
   }
 
   async create(input: CreateExerciseInput): Promise<Exercise> {
     const timestamp = nowIso();
-    const exercise: Exercise = {
+    const exercise = normalizeExercise({
       ...input,
       id: createId(),
       createdAt: timestamp,
       updatedAt: timestamp,
-    };
+    });
     await db.exercises.add(exercise);
     return exercise;
   }
@@ -30,13 +33,13 @@ export class DexieExerciseRepository implements ExerciseRepository {
       throw new Error(`Упражнение не найдено: ${id}`);
     }
 
-    const updated: Exercise = {
+    const updated = normalizeExercise({
       ...existing,
       ...input,
       id: existing.id,
       createdAt: existing.createdAt,
       updatedAt: nowIso(),
-    };
+    });
 
     await db.exercises.put(updated);
     return updated;
