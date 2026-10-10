@@ -1,23 +1,45 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  PencilIcon,
-  TrashIcon,
-} from '../components/icons';
+import { PencilIcon, TrashIcon } from '../components/icons';
+import { PageBack } from '../components/PageBack';
+import { usePointerReorder } from '../hooks/usePointerReorder';
 import { useProgramDetails } from '../hooks/useProgramsEditor';
 
 export function ProgramDetailPage() {
   const { programId } = useParams<{ programId: string }>();
-  const { details, loading, error, rename, addDay, removeDay, moveDay } =
+  const { details, loading, error, rename, addDay, removeDay, reorderDays } =
     useProgramDetails(programId);
   const [dayName, setDayName] = useState('');
   const [showDayForm, setShowDayForm] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
+
+  const baselineIds = useMemo(
+    () => details?.templates.map(({ template }) => template.id) ?? [],
+    [details?.templates],
+  );
+
+  const onReorder = useCallback(
+    (orderedIds: string[]) => {
+      void reorderDays(orderedIds);
+    },
+    [reorderDays],
+  );
+
+  const { dragId, orderedIds, handleProps, itemAttr } = usePointerReorder(baselineIds, onReorder);
+
+  const orderedTemplates = useMemo(() => {
+    if (!details) {
+      return [];
+    }
+    const byId = new Map(details.templates.map((item) => [item.template.id, item]));
+    return orderedIds.flatMap((id) => {
+      const item = byId.get(id);
+      return item ? [item] : [];
+    });
+  }, [details, orderedIds]);
 
   async function handleAddDay(event: FormEvent) {
     event.preventDefault();
@@ -42,28 +64,29 @@ export function ProgramDetailPage() {
   }
 
   if (loading) {
-    return <p className="text-secondary">Загрузка…</p>;
+    return (
+      <div className="d-flex flex-column gap-3">
+        <PageBack fallback="/programs" />
+        <p className="text-secondary">Загрузка…</p>
+      </div>
+    );
   }
 
   if (error || !details) {
     return (
       <div className="d-flex flex-column gap-3">
+        <PageBack fallback="/programs" />
         <p className="text-danger mb-0">{error ?? 'Программа не найдена'}</p>
-        <Link to="/programs" className="btn btn-outline-secondary touch-btn">
-          К программам
-        </Link>
       </div>
     );
   }
 
-  const { program, templates } = details;
+  const { program } = details;
 
   return (
     <div className="d-flex flex-column gap-3">
       <header className="page-header">
-        <Link to="/programs" className="page-back">
-          ← Программы
-        </Link>
+        <PageBack fallback="/programs" />
         {editingName ? (
           <form
             className="day-name-edit"
@@ -141,49 +164,51 @@ export function ProgramDetailPage() {
 
       {actionError && <div className="alert alert-danger py-2 mb-0">{actionError}</div>}
 
-      {templates.length === 0 ? (
+      {orderedTemplates.length === 0 ? (
         <p className="text-secondary">Добавьте первый день</p>
       ) : (
         <div className="apple-group">
-          {templates.map(({ template, exercises }, index) => (
-            <div key={template.id} className="apple-row align-items-start">
+          {orderedTemplates.map(({ template, exercises }) => (
+            <div
+              key={template.id}
+              className={`apple-row apple-row--exercise${dragId === template.id ? ' is-dragging' : ''}`}
+              {...itemAttr(template.id)}
+            >
+              <div
+                className="drag-handle"
+                title="Перетащите для порядка"
+                aria-label="Перетащить"
+                role="button"
+                tabIndex={0}
+                onPointerDown={(event) => handleProps.onPointerDown(template.id, event)}
+                onPointerMove={handleProps.onPointerMove}
+                onPointerUp={handleProps.end}
+                onPointerCancel={handleProps.end}
+              >
+                ⋮⋮
+              </div>
               <Link
                 to={`/programs/${program.id}/days/${template.id}`}
-                className="text-decoration-none text-dark flex-grow-1"
+                className="exercise-row-main text-decoration-none text-dark"
               >
-                <div className="apple-row-title">{template.name}</div>
-                <div className="apple-row-meta">{exercises.length} упр.</div>
+                <div className="flex-grow-1 min-w-0 text-start">
+                  <div className="apple-row-title">{template.name}</div>
+                  <div className="apple-row-meta">{exercises.length} упр.</div>
+                </div>
               </Link>
-              <div className="compact-row-actions">
+              <div className="btn-group exercise-row-actions" role="group" aria-label="Действия">
                 <button
                   type="button"
-                  className="icon-btn"
-                  disabled={index === 0}
-                  onClick={() => void moveDay(template.id, -1)}
-                  aria-label="Выше"
-                >
-                  <ChevronUpIcon />
-                </button>
-                <button
-                  type="button"
-                  className="icon-btn"
-                  disabled={index === templates.length - 1}
-                  onClick={() => void moveDay(template.id, 1)}
-                  aria-label="Ниже"
-                >
-                  <ChevronDownIcon />
-                </button>
-                <button
-                  type="button"
-                  className="icon-btn icon-btn--danger"
+                  className="btn btn-danger exercise-action-btn"
                   aria-label="Удалить"
+                  title="Удалить"
                   onClick={() => {
                     if (window.confirm(`Удалить «${template.name}»?`)) {
                       void removeDay(template.id);
                     }
                   }}
                 >
-                  <TrashIcon size={17} />
+                  <TrashIcon size={20} />
                 </button>
               </div>
             </div>

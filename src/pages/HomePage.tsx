@@ -75,20 +75,25 @@ export function HomePage() {
           <p className="text-secondary mb-0 px-1">Пока нет записей</p>
         ) : (
           <div className="apple-group">
-            {recent.map((workout) => (
-              <Link key={workout.id} to={`/workout/${workout.id}`} className="apple-row">
-                <div>
-                  <div className="apple-row-title">{workout.name}</div>
-                  <div className="apple-row-meta">
-                    {formatDateRu(workout.startedAt)}
-                    {workout.finishedAt ? '' : ' · не завершена'}
+            {recent.map((workout) => {
+              const done = Boolean(workout.finishedAt);
+              return (
+                <Link key={workout.id} to={`/workout/${workout.id}`} className="apple-row">
+                  <div className="flex-grow-1 min-w-0">
+                    <div className="apple-row-title">{workout.name}</div>
+                    <div className="apple-row-meta">{formatDateRu(workout.startedAt)}</div>
                   </div>
-                </div>
-                <span className="apple-chevron" aria-hidden>
-                  ›
-                </span>
-              </Link>
-            ))}
+                  <span
+                    className={`status-pill status-pill--${done ? 'done' : 'active'}`}
+                  >
+                    {done ? 'Завершена' : 'В процессе'}
+                  </span>
+                  <span className="apple-chevron" aria-hidden>
+                    ›
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         )}
       </section>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PageBack } from '../components/PageBack';
 import { usePrograms } from '../hooks/useWorkouts';
 import { workoutService } from '../services/workoutService';
 
@@ -22,15 +23,21 @@ export function StartWorkoutPage() {
   }
 
   if (loading) {
-    return <p className="text-secondary">Загрузка программ…</p>;
+    return (
+      <div className="d-flex flex-column gap-3">
+        <PageBack />
+        <p className="text-secondary">Загрузка программ…</p>
+      </div>
+    );
   }
 
   return (
     <div className="d-flex flex-column gap-3">
-      <div>
+      <header className="page-header">
+        <PageBack />
         <h1 className="page-title">Начать</h1>
         <p className="page-subtitle">Выберите день программы</p>
-      </div>
+      </header>
 
       {(error || actionError) && (
         <div className="alert alert-danger mb-0">{error ?? actionError}</div>

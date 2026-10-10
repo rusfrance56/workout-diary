@@ -6,7 +6,7 @@ import { useSettingsContext } from '../../hooks/SettingsProvider';
 import { exerciseService } from '../../services/exerciseService';
 import { workoutService } from '../../services/workoutService';
 import { resolveAssetUrl } from '../../utils/assetUrl';
-import { formatWeight, roundWeight } from '../../utils/weight';
+import { formatSetGroups, roundWeight } from '../../utils/weight';
 import { ExerciseAutocomplete } from '../ExerciseAutocomplete';
 import { SetEditorRow } from './SetEditorRow';
 
@@ -47,17 +47,12 @@ export function ExercisePanel({
   const [replacing, setReplacing] = useState(false);
   const [catalog, setCatalog] = useState<Exercise[]>([]);
   const [replaceId, setReplaceId] = useState('');
-  const [notes, setNotes] = useState(initialNotes);
   const [catalogNotes, setCatalogNotes] = useState('');
   const [catalogImage, setCatalogImage] = useState<string | undefined>();
 
   const done = sets.filter((set) => set.completed).length;
   const allDone = !skipped && done === sets.length && sets.length > 0;
-  const hasNotes = Boolean((initialNotes || notes).trim());
-
-  useEffect(() => {
-    setNotes(initialNotes);
-  }, [initialNotes, workoutExerciseId]);
+  const hasNotes = Boolean(initialNotes.trim());
 
   useEffect(() => {
     if (!open) {
@@ -139,19 +134,6 @@ export function ExercisePanel({
       await onChanged();
     } finally {
       setSavingId(null);
-    }
-  }
-
-  async function handleNotesBlur() {
-    const trimmed = notes.trim();
-    if (trimmed === (initialNotes ?? '').trim()) {
-      return;
-    }
-    try {
-      await workoutService.updateExerciseNotes(workoutExerciseId, trimmed);
-      await onChanged();
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Не удалось сохранить комментарий');
     }
   }
 
@@ -283,9 +265,9 @@ export function ExercisePanel({
 
           {!skipped && previous.length > 0 && (
             <div className="previous-strip" aria-label="Прошлый раз">
-              {previous.map((set) => (
-                <span key={set.setNumber} className="previous-chip">
-                  {formatWeight(set.weightKg, weightUnit)} × {set.reps}
+              {formatSetGroups(previous, weightUnit).map((label, index) => (
+                <span key={`${index}-${label}`} className="previous-chip">
+                  {label}
                 </span>
               ))}
             </div>
@@ -299,7 +281,7 @@ export function ExercisePanel({
             <>
               {sets.map((set) => (
                 <SetEditorRow
-                  key={`${set.id}-${set.completed}-${set.weightKg}-${set.reps}`}
+                  key={`${set.id}-${set.completed}-${set.weightKg}-${set.reps}-${weightUnit}`}
                   set={set}
                   disabled={finished}
                   busy={savingId === set.id}
@@ -313,30 +295,70 @@ export function ExercisePanel({
               {!finished && (
                 <button
                   type="button"
-                  className="btn btn-outline-secondary touch-btn w-100 mt-2"
+                  className="btn-add-set"
                   disabled={savingId !== null}
                   onClick={() => void handleAddSet()}
                 >
-                  Добавить подход
+                  + Подход
                 </button>
               )}
             </>
           )}
 
-          <label className="exercise-notes">
-            <span>Комментарий к упражнению</span>
-            <textarea
-              className="form-control"
-              rows={2}
-              placeholder="Личное: как прошло сегодня…"
-              value={notes}
-              disabled={finished}
-              onChange={(event) => setNotes(event.target.value)}
-              onBlur={() => void handleNotesBlur()}
-            />
-          </label>
+          <ExerciseNotesField
+            key={workoutExerciseId}
+            workoutExerciseId={workoutExerciseId}
+            initialNotes={initialNotes}
+            disabled={finished}
+            onSaved={onChanged}
+            onError={setActionError}
+          />
         </div>
       )}
     </section>
+  );
+}
+
+function ExerciseNotesField({
+  workoutExerciseId,
+  initialNotes,
+  disabled,
+  onSaved,
+  onError,
+}: {
+  workoutExerciseId: string;
+  initialNotes: string;
+  disabled: boolean;
+  onSaved: () => Promise<void>;
+  onError: (message: string) => void;
+}) {
+  const [notes, setNotes] = useState(initialNotes);
+
+  async function handleBlur() {
+    const trimmed = notes.trim();
+    if (trimmed === initialNotes.trim()) {
+      return;
+    }
+    try {
+      await workoutService.updateExerciseNotes(workoutExerciseId, trimmed);
+      await onSaved();
+    } catch (err) {
+      onError(err instanceof Error ? err.message : 'Не удалось сохранить комментарий');
+    }
+  }
+
+  return (
+    <label className="exercise-notes">
+      <span>Комментарий к упражнению</span>
+      <textarea
+        className="form-control"
+        rows={2}
+        placeholder="Личное: как прошло сегодня…"
+        value={notes}
+        disabled={disabled}
+        onChange={(event) => setNotes(event.target.value)}
+        onBlur={() => void handleBlur()}
+      />
+    </label>
   );
 }

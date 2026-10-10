@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { PageBack } from '../components/PageBack';
 import { backupService, downloadTextFile } from '../services/backupService';
 
 export function BackupPage() {
@@ -70,47 +70,60 @@ export function BackupPage() {
   return (
     <div className="d-flex flex-column gap-3">
       <header className="page-header">
-        <Link to="/" className="page-back">
-          ← Назад
-        </Link>
+        <PageBack />
         <h1 className="page-title">Бэкап</h1>
-        <p className="page-subtitle">Экспорт и импорт до синхронизации</p>
+        <p className="page-subtitle">Резервная копия и выгрузка для таблиц</p>
       </header>
 
-      <section className="apple-group">
-        <button
-          type="button"
-          className="apple-row apple-row-button"
-          disabled={busy}
-          onClick={() => void exportJson()}
-        >
-          <div>
-            <div className="apple-row-title">Экспорт JSON</div>
-            <div className="apple-row-meta">Полный бэкап каталога и тренировок</div>
-          </div>
-        </button>
-        <button
-          type="button"
-          className="apple-row apple-row-button"
-          disabled={busy}
-          onClick={() => void exportCsv()}
-        >
-          <div>
-            <div className="apple-row-title">Экспорт CSV</div>
-            <div className="apple-row-meta">Подходы по тренировкам</div>
-          </div>
-        </button>
-        <button
-          type="button"
-          className="apple-row apple-row-button"
-          disabled={busy}
-          onClick={() => fileRef.current?.click()}
-        >
-          <div>
-            <div className="apple-row-title">Импорт JSON</div>
-            <div className="apple-row-meta">Заменяет все локальные данные</div>
-          </div>
-        </button>
+      <section>
+        <div className="section-label">Резервная копия</div>
+        <p className="page-subtitle px-1 mb-2">
+          Сохраняет всё: упражнения, программы, дни, тренировки и настройки.
+        </p>
+        <div className="apple-group">
+          <button
+            type="button"
+            className="apple-row apple-row-button"
+            disabled={busy}
+            onClick={() => void exportJson()}
+          >
+            <div>
+              <div className="apple-row-title">Экспорт JSON</div>
+              <div className="apple-row-meta">Сохранить всё для переноса или восстановления</div>
+            </div>
+          </button>
+          <button
+            type="button"
+            className="apple-row apple-row-button"
+            disabled={busy}
+            onClick={() => fileRef.current?.click()}
+          >
+            <div>
+              <div className="apple-row-title">Импорт JSON</div>
+              <div className="apple-row-meta">Заменит все локальные данные текущим файлом</div>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <section>
+        <div className="section-label">Для Excel / Sheets</div>
+        <p className="page-subtitle px-1 mb-2">
+          Таблица с подходами для Excel или Google Sheets.
+        </p>
+        <div className="apple-group">
+          <button
+            type="button"
+            className="apple-row apple-row-button"
+            disabled={busy}
+            onClick={() => void exportCsv()}
+          >
+            <div>
+              <div className="apple-row-title">Экспорт CSV</div>
+              <div className="apple-row-meta">Только подходы: вес, повторы, даты</div>
+            </div>
+          </button>
+        </div>
       </section>
 
       <input

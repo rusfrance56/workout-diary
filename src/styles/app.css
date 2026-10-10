@@ -5,6 +5,7 @@
   --app-surface-secondary: #f2f2f7;
   --app-text: #1c1c1e;
   --app-muted: #8e8e93;
+  --app-placeholder: #8e8e93;
   --app-border: rgba(60, 60, 67, 0.12);
   --app-separator: rgba(60, 60, 67, 0.18);
   --app-header-bg: rgba(242, 242, 247, 0.82);
@@ -36,6 +37,7 @@ html[data-theme='dark'] {
   --app-surface-secondary: #2c2c2e;
   --app-text: #f5f5f7;
   --app-muted: #8e8e93;
+  --app-placeholder: #aeb0b5;
   --app-border: rgba(84, 84, 88, 0.45);
   --app-separator: rgba(84, 84, 88, 0.55);
   --app-header-bg: rgba(0, 0, 0, 0.72);
@@ -225,6 +227,10 @@ a {
   font-size: 15px;
   font-weight: 600;
   line-height: 1.2;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .page-title-btn {
@@ -294,17 +300,34 @@ a {
   padding: 12px 10px 12px 14px;
 }
 
+.compact-row--flush {
+  align-items: stretch;
+  gap: 0;
+  padding: 0 0 0 8px;
+}
+
+.compact-row--flush .drag-handle {
+  display: flex;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.compact-row--flush .exercise-row-main {
+  padding: 12px 10px 12px 4px;
+}
+
+.compact-row--flush .exercise-row-actions > .btn:last-child {
+  border-top-right-radius: var(--app-radius) !important;
+}
+
+.exercise-panel--compact:not(.is-open) .compact-row--flush .exercise-row-actions > .btn:last-child {
+  border-bottom-right-radius: var(--app-radius) !important;
+}
+
 .compact-row-main {
   flex: 1;
   min-width: 0;
-}
-
-.compact-row-actions {
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  gap: 0;
-  margin-top: -2px;
 }
 
 .exercise-panel--compact .exercise-panel-title {
@@ -584,6 +607,60 @@ a {
   background: var(--app-surface-secondary);
 }
 
+.apple-row.apple-row--exercise {
+  padding: 0 0 0 16px;
+  gap: 0;
+  align-items: stretch;
+}
+
+.exercise-row-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 10px 12px 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.exercise-row-main:active {
+  opacity: 0.72;
+}
+
+.exercise-row-actions {
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+}
+
+.exercise-row-actions > .btn {
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+.exercise-action-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: auto !important;
+  align-self: stretch;
+  padding: 0;
+}
+
+.apple-row--exercise:first-child .exercise-row-actions > .btn:last-child {
+  border-top-right-radius: var(--app-radius) !important;
+}
+
+.apple-row--exercise:last-child .exercise-row-actions > .btn:last-child {
+  border-bottom-right-radius: var(--app-radius) !important;
+}
+
 .section-label {
   margin: 8px 4px 8px;
   color: var(--app-muted);
@@ -701,6 +778,40 @@ a {
 .touch-btn-sm {
   min-height: 40px;
   min-width: 72px;
+  font-weight: 600;
+  border-radius: 10px !important;
+  padding: 0 14px;
+}
+
+.form-actions-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.form-actions-row .btn {
+  margin: 0;
+}
+
+.btn-add-set {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 6px 2px;
+  border: none;
+  background: transparent;
+  color: var(--app-accent);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-add-set:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn-add-set:not(:disabled):active {
+  opacity: 0.65;
 }
 
 .form-control,
@@ -713,10 +824,27 @@ a {
   box-shadow: none !important;
 }
 
+.form-control::placeholder,
+.form-control::-webkit-input-placeholder,
+.form-select::placeholder {
+  color: var(--app-placeholder) !important;
+  opacity: 1 !important;
+}
+
+.form-control::-moz-placeholder {
+  color: var(--app-placeholder) !important;
+  opacity: 1 !important;
+}
+
 .form-control:focus,
 .form-select:focus {
   border-color: var(--app-accent) !important;
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18) !important;
+}
+
+html[data-theme='dark'] .form-control:focus,
+html[data-theme='dark'] .form-select:focus {
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.28) !important;
 }
 
 .form-label {
@@ -898,13 +1026,20 @@ a {
   color: var(--app-muted);
   font-size: 14px;
   line-height: 1;
-  padding: 10px 2px 0;
+  padding: 10px 8px 10px 2px;
   letter-spacing: -2px;
   cursor: grab;
   user-select: none;
+  touch-action: none;
+  -webkit-user-select: none;
 }
 
-.exercise-panel.is-dragging {
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.exercise-panel.is-dragging,
+.apple-row.is-dragging {
   opacity: 0.55;
 }
 
@@ -1287,13 +1422,29 @@ a {
 .status-pill {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 6px;
   padding: 4px 10px;
   border-radius: 999px;
   background: rgba(52, 199, 89, 0.14);
   color: var(--app-success);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-pill--done {
+  background: var(--app-done-bg);
+  color: var(--app-success);
+}
+
+.status-pill--active {
+  background: rgba(0, 122, 255, 0.14);
+  color: var(--app-accent);
+}
+
+html[data-theme='dark'] .status-pill--active {
+  background: rgba(10, 132, 255, 0.18);
 }
 
 @media (min-width: 768px) {

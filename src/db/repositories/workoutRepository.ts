@@ -39,6 +39,8 @@ export interface WorkoutRepository {
   getWorkoutExerciseById(id: string): Promise<WorkoutExercise | undefined>;
   create(workout: Workout): Promise<void>;
   update(workout: Workout): Promise<void>;
+  /** Переименовать все тренировки, созданные из дня программы. */
+  renameByTemplateId(templateId: string, name: string): Promise<number>;
   addExercise(exercise: WorkoutExercise): Promise<void>;
   updateExercise(exercise: WorkoutExercise): Promise<void>;
   addSets(sets: WorkoutSet[]): Promise<void>;
@@ -110,6 +112,24 @@ export class DexieWorkoutRepository implements WorkoutRepository {
 
   async update(workout: Workout): Promise<void> {
     await db.workouts.put(workout);
+  }
+
+  async renameByTemplateId(templateId: string, name: string): Promise<number> {
+    const matches = await db.workouts
+      .filter((workout) => workout.templateId === templateId)
+      .toArray();
+    if (matches.length === 0) {
+      return 0;
+    }
+    const timestamp = nowIso();
+    await db.workouts.bulkPut(
+      matches.map((workout) => ({
+        ...workout,
+        name,
+        updatedAt: timestamp,
+      })),
+    );
+    return matches.length;
   }
 
   async addExercise(exercise: WorkoutExercise): Promise<void> {

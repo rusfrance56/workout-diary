@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { PageBack } from '../components/PageBack';
 import { SparklineChart } from '../components/SparklineChart';
 import type { ExerciseStats, HistorySession, WeightUnit } from '../domain';
 import { useSettingsContext } from '../hooks/SettingsProvider';
 import { exerciseService } from '../services/exerciseService';
 import { workoutService } from '../services/workoutService';
 import { formatDateRu } from '../utils/date';
-import { formatWeight, kgToDisplay } from '../utils/weight';
+import { formatSetGroups, formatWeight, kgToDisplay } from '../utils/weight';
 
 function formatDelta(value: number, unit: string): string {
   if (value === 0) {
@@ -71,16 +72,19 @@ export function ExerciseHistoryPage() {
   }, [exerciseId]);
 
   if (loading) {
-    return <p className="text-secondary">Загрузка…</p>;
+    return (
+      <div className="d-flex flex-column gap-3">
+        <PageBack fallback="/exercises" />
+        <p className="text-secondary">Загрузка…</p>
+      </div>
+    );
   }
 
   if (error) {
     return (
       <div className="d-flex flex-column gap-3">
+        <PageBack fallback="/exercises" />
         <p className="text-danger mb-0">{error}</p>
-        <Link to="/exercises" className="btn btn-outline-secondary touch-btn">
-          К упражнениям
-        </Link>
       </div>
     );
   }
@@ -95,9 +99,7 @@ export function ExerciseHistoryPage() {
   return (
     <div className="d-flex flex-column gap-3">
       <header className="page-header">
-        <Link to="/exercises" className="page-back">
-          ← Упражнения
-        </Link>
+        <PageBack fallback="/exercises" />
         <h1 className="page-title">{name}</h1>
         <p className="page-subtitle">История и статистика</p>
       </header>
@@ -163,9 +165,9 @@ export function ExerciseHistoryPage() {
                     </div>
                   </div>
                   <div className="previous-strip">
-                    {session.sets.map((set) => (
-                      <span key={set.setNumber} className="previous-chip">
-                        {formatWeight(set.weightKg, weightUnit)} × {set.reps}
+                    {formatSetGroups(session.sets, weightUnit).map((label, index) => (
+                      <span key={`${index}-${label}`} className="previous-chip">
+                        {label}
                       </span>
                     ))}
                   </div>

@@ -31,15 +31,9 @@ export function formatWeight(weightKg: number, unit: WeightUnit): string {
   return `${trimTrailingZeros(value)} ${unitLabel}`;
 }
 
-/** Единый вид: `50кг×12 · 70кг×10 · 80кг×6-6-5` */
-export function formatSetsCompact(
+function groupAdjacentByWeight(
   sets: Array<{ weightKg: number; reps: number }>,
-  unit: WeightUnit = 'kg',
-): string {
-  if (sets.length === 0) {
-    return '';
-  }
-
+): Array<{ weightKg: number; reps: number[] }> {
   const groups: Array<{ weightKg: number; reps: number[] }> = [];
   for (const set of sets) {
     const last = groups[groups.length - 1];
@@ -49,14 +43,32 @@ export function formatSetsCompact(
       groups.push({ weightKg: set.weightKg, reps: [set.reps] });
     }
   }
+  return groups;
+}
+
+/** Чипы: `80 кг × 6-6-5` (смежный одинаковый вес склеивается) */
+export function formatSetGroups(
+  sets: Array<{ weightKg: number; reps: number }>,
+  unit: WeightUnit = 'kg',
+): string[] {
+  return groupAdjacentByWeight(sets).map(
+    (group) => `${formatWeight(group.weightKg, unit)} × ${group.reps.join('-')}`,
+  );
+}
+
+/** Единый вид: `50кг×12 · 70кг×10 · 80кг×6-6-5` */
+export function formatSetsCompact(
+  sets: Array<{ weightKg: number; reps: number }>,
+  unit: WeightUnit = 'kg',
+): string {
+  if (sets.length === 0) {
+    return '';
+  }
 
   const unitLabel = unit === 'kg' ? 'кг' : 'lb';
-  return groups
+  return groupAdjacentByWeight(sets)
     .map((group) => {
       const value = trimTrailingZeros(kgToDisplay(group.weightKg, unit));
-      if (group.reps.length === 1) {
-        return `${value}${unitLabel}×${group.reps[0]}`;
-      }
       return `${value}${unitLabel}×${group.reps.join('-')}`;
     })
     .join(' · ');

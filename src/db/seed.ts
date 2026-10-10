@@ -572,18 +572,45 @@ export async function ensureProgramSeed(): Promise<void> {
     return;
   }
 
-  let templates: SeededTemplate[] = [];
-
   const programsCount = await db.programs.count();
-  if (programsCount === 0) {
-    templates = await seedProgram(db, exercises, nowIso());
-  } else {
-    templates = await loadSeededTemplates(db);
-  }
+  const templates =
+    programsCount === 0
+      ? await seedProgram(db, exercises, nowIso())
+      : await loadSeededTemplates(db);
 
   const workoutsCount = await db.workouts.count();
   if (workoutsCount === 0 && templates.length > 0) {
     await seedDemoHistory(db, exercises, templates);
+  }
+
+  await syncWorkoutNamesFromTemplates();
+}
+
+/** Подтягивает имена тренировок к актуальным названиям дней программы. */
+async function syncWorkoutNamesFromTemplates(): Promise<void> {
+  const [templates, workouts] = await Promise.all([
+    db.templates.toArray(),
+    db.workouts.toArray(),
+  ]);
+  if (templates.length === 0 || workouts.length === 0) {
+    return;
+  }
+
+  const nameByTemplate = new Map(templates.map((item) => [item.id, item.name]));
+  const timestamp = nowIso();
+  const updated = workouts.flatMap((workout) => {
+    if (!workout.templateId) {
+      return [];
+    }
+    const nextName = nameByTemplate.get(workout.templateId);
+    if (!nextName || nextName === workout.name) {
+      return [];
+    }
+    return [{ ...workout, name: nextName, updatedAt: timestamp }];
+  });
+
+  if (updated.length > 0) {
+    await db.workouts.bulkPut(updated);
   }
 }
 

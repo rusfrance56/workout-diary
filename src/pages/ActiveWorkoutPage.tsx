@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { PageBack } from '../components/PageBack';
 import { ExercisePanel } from '../components/workout/ExercisePanel';
 import { useWorkoutDetails } from '../hooks/useWorkouts';
 import { workoutService } from '../services/workoutService';
@@ -10,11 +11,6 @@ export function ActiveWorkoutPage() {
   const navigate = useNavigate();
   const { details, loading, error, refresh } = useWorkoutDetails(workoutId);
   const [openId, setOpenId] = useState<string | null>(null);
-  const [notes, setNotes] = useState('');
-
-  useEffect(() => {
-    setNotes(details?.workout.notes ?? '');
-  }, [details?.workout.id, details?.workout.notes]);
 
   async function handleFinish() {
     if (!details) {
@@ -53,29 +49,20 @@ export function ActiveWorkoutPage() {
     navigate('/', { replace: true });
   }
 
-  async function handleNotesBlur() {
-    if (!details) {
-      return;
-    }
-    const current = details.workout.notes ?? '';
-    if (notes.trim() === current.trim()) {
-      return;
-    }
-    await workoutService.updateNotes(details.workout.id, notes);
-    await refresh();
-  }
-
   if (loading) {
-    return <p className="text-secondary">Загрузка…</p>;
+    return (
+      <div className="d-flex flex-column gap-3">
+        <PageBack />
+        <p className="text-secondary">Загрузка…</p>
+      </div>
+    );
   }
 
   if (error || !details) {
     return (
       <div className="d-flex flex-column gap-3">
+        <PageBack />
         <p className="text-danger mb-0">{error ?? 'Тренировка не найдена'}</p>
-        <Link to="/" className="btn btn-outline-secondary touch-btn">
-          На главную
-        </Link>
       </div>
     );
   }
@@ -92,9 +79,7 @@ export function ActiveWorkoutPage() {
   return (
     <div className="workout-session">
       <header className="page-header">
-        <Link to="/" className="page-back">
-          ← Назад
-        </Link>
+        <PageBack />
         <h1 className="page-title">{workout.name}</h1>
         <p className="page-subtitle">
           {formatDateRu(workout.startedAt)} · {completedSets}/{totalSets} подходов
@@ -124,18 +109,13 @@ export function ActiveWorkoutPage() {
         ))}
       </div>
 
-      <label className="workout-notes">
-        <span className="section-label">Заметки</span>
-        <textarea
-          className="form-control"
-          rows={2}
-          placeholder="Как прошло, самочувствие…"
-          value={notes}
-          disabled={finished}
-          onChange={(event) => setNotes(event.target.value)}
-          onBlur={() => void handleNotesBlur()}
-        />
-      </label>
+      <WorkoutNotesField
+        key={workout.id}
+        workoutId={workout.id}
+        initialNotes={workout.notes ?? ''}
+        disabled={finished}
+        onSaved={refresh}
+      />
 
       <div className="workout-footer">
         {!finished && (
@@ -156,5 +136,42 @@ export function ActiveWorkoutPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+function WorkoutNotesField({
+  workoutId,
+  initialNotes,
+  disabled,
+  onSaved,
+}: {
+  workoutId: string;
+  initialNotes: string;
+  disabled: boolean;
+  onSaved: () => Promise<void>;
+}) {
+  const [notes, setNotes] = useState(initialNotes);
+
+  async function handleBlur() {
+    if (notes.trim() === initialNotes.trim()) {
+      return;
+    }
+    await workoutService.updateNotes(workoutId, notes);
+    await onSaved();
+  }
+
+  return (
+    <label className="workout-notes">
+      <span className="section-label">Заметки</span>
+      <textarea
+        className="form-control"
+        rows={2}
+        placeholder="Как прошло, самочувствие…"
+        value={notes}
+        disabled={disabled}
+        onChange={(event) => setNotes(event.target.value)}
+        onBlur={() => void handleBlur()}
+      />
+    </label>
   );
 }

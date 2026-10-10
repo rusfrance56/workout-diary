@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { FormEvent } from 'react';
 import type { WeightUnit, WorkoutSet } from '../../domain';
 import { displayToKg, kgToDisplay, roundWeight } from '../../utils/weight';
@@ -26,11 +26,6 @@ export function SetEditorRow({
   const unitLabel = weightUnit === 'lb' ? 'lb' : 'кг';
   const [weight, setWeight] = useState(String(kgToDisplay(set.weightKg, weightUnit) || ''));
   const [reps, setReps] = useState(String(set.reps || ''));
-
-  useEffect(() => {
-    setWeight(String(kgToDisplay(set.weightKg, weightUnit) || ''));
-    setReps(String(set.reps || ''));
-  }, [set.id, set.weightKg, set.reps, set.completed, weightUnit]);
 
   const locked = disabled || set.completed;
 

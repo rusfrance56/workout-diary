@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { HistoryIcon, PencilIcon, TrashIcon } from '../components/icons';
+import { HistoryIcon, TrashIcon } from '../components/icons';
+import { PageBack } from '../components/PageBack';
 import type { CreateExerciseInput, Exercise, MuscleGroup } from '../domain';
 import { formatMuscleGroups } from '../domain';
 import { MUSCLE_GROUP_LABELS, MUSCLE_GROUP_SECTIONS } from '../domain/labels';
@@ -162,16 +163,19 @@ export function ExercisesPage() {
 
   return (
     <div className="d-flex flex-column gap-3">
-      <div className="d-flex justify-content-between align-items-end gap-2">
-        <h1 className="page-title mb-0">Упражнения</h1>
-        <button
-          type="button"
-          className="btn btn-primary touch-btn"
-          onClick={() => (showForm ? closeForm() : openCreate())}
-        >
-          {showForm ? 'Отмена' : 'Добавить'}
-        </button>
-      </div>
+      <header className="page-header">
+        <PageBack />
+        <div className="d-flex justify-content-between align-items-end gap-2">
+          <h1 className="page-title mb-0">Упражнения</h1>
+          <button
+            type="button"
+            className="btn btn-primary touch-btn"
+            onClick={() => (showForm ? closeForm() : openCreate())}
+          >
+            {showForm ? 'Отмена' : 'Добавить'}
+          </button>
+        </div>
+      </header>
 
       {!showForm && (
         <>
@@ -297,57 +301,60 @@ export function ExercisesPage() {
               <div className="section-label">{title}</div>
               <div className="apple-group">
                 {items.map((exercise) => (
-                  <div key={exercise.id} className="apple-row align-items-center">
-                    {exercise.imageDataUrl && (
-                      <img
-                        src={resolveAssetUrl(exercise.imageDataUrl)}
-                        alt=""
-                        className="exercise-list-thumb"
-                      />
-                    )}
-                    <div className="flex-grow-1">
-                      <div className="apple-row-title">{exercise.name}</div>
-                      <div className="apple-row-meta">
-                        <span className="muscle-primary">
-                          {formatMuscleGroups(exercise.primaryMuscleGroups, MUSCLE_GROUP_LABELS)}
-                        </span>
-                        {exercise.secondaryMuscleGroups.length > 0 && (
-                          <>
-                            {' · '}
-                            <span className="muscle-secondary">
-                              {formatMuscleGroups(
-                                exercise.secondaryMuscleGroups,
-                                MUSCLE_GROUP_LABELS,
-                              )}
-                            </span>
-                          </>
-                        )}
+                  <div key={exercise.id} className="apple-row apple-row--exercise">
+                    <button
+                      type="button"
+                      className="exercise-row-main"
+                      onClick={() => openEdit(exercise)}
+                    >
+                      {exercise.imageDataUrl && (
+                        <img
+                          src={resolveAssetUrl(exercise.imageDataUrl)}
+                          alt=""
+                          className="exercise-list-thumb"
+                        />
+                      )}
+                      <div className="flex-grow-1 min-w-0 text-start">
+                        <div className="apple-row-title">{exercise.name}</div>
+                        <div className="apple-row-meta">
+                          <span className="muscle-primary">
+                            {formatMuscleGroups(exercise.primaryMuscleGroups, MUSCLE_GROUP_LABELS)}
+                          </span>
+                          {exercise.secondaryMuscleGroups.length > 0 && (
+                            <>
+                              {' · '}
+                              <span className="muscle-secondary">
+                                {formatMuscleGroups(
+                                  exercise.secondaryMuscleGroups,
+                                  MUSCLE_GROUP_LABELS,
+                                )}
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="compact-row-actions">
+                    </button>
+                    <div
+                      className="btn-group exercise-row-actions"
+                      role="group"
+                      aria-label="Действия"
+                    >
                       <Link
                         to={`/exercises/${exercise.id}/history`}
-                        className="icon-btn"
+                        className="btn btn-secondary exercise-action-btn"
                         aria-label="История"
                         title="История"
                       >
-                        <HistoryIcon size={17} />
+                        <HistoryIcon size={20} />
                       </Link>
                       <button
                         type="button"
-                        className="icon-btn"
-                        aria-label="Изменить"
-                        onClick={() => openEdit(exercise)}
-                      >
-                        <PencilIcon size={17} />
-                      </button>
-                      <button
-                        type="button"
-                        className="icon-btn icon-btn--danger"
+                        className="btn btn-danger exercise-action-btn"
                         aria-label="Удалить"
+                        title="Удалить"
                         onClick={() => void handleDelete(exercise)}
                       >
-                        <TrashIcon size={17} />
+                        <TrashIcon size={20} />
                       </button>
                     </div>
                   </div>

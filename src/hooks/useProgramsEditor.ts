@@ -137,15 +137,18 @@ export function useProgramDetails(programId: string | undefined) {
     [refresh],
   );
 
-  const moveDay = useCallback(
-    async (templateId: string, direction: -1 | 1) => {
-      await programService.moveDay(templateId, direction);
+  const reorderDays = useCallback(
+    async (orderedIds: string[]) => {
+      if (!programId) {
+        return;
+      }
+      await programService.reorderDays(programId, orderedIds);
       await refresh();
     },
-    [refresh],
+    [programId, refresh],
   );
 
-  return { details, loading, error, refresh, rename, addDay, removeDay, moveDay };
+  return { details, loading, error, refresh, rename, addDay, removeDay, reorderDays };
 }
 
 export function useTemplateEditor(templateId: string | undefined) {

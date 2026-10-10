@@ -16,6 +16,7 @@ import {
   programRepository,
   type ProgramWithTemplates,
 } from '../db/repositories/programRepository';
+import { workoutRepository } from '../db/repositories/workoutRepository';
 
 export interface CreateProgramInput {
   name: string;
@@ -167,6 +168,8 @@ export class ProgramService {
       updatedAt: nowIso(),
     };
     await programRepository.updateTemplate(updated);
+    // Имя сессии копируется при старте — синхронизируем все связанные тренировки
+    await workoutRepository.renameByTemplateId(templateId, nextName);
     return updated;
   }
 
@@ -180,36 +183,27 @@ export class ProgramService {
     await this.reindexDays(template.programId);
   }
 
-  async moveDay(templateId: string, direction: -1 | 1): Promise<void> {
-    const template = await programRepository.getTemplateById(templateId);
-    if (!template) {
-      throw new Error('День не найден');
-    }
-
-    const details = await programRepository.getWithTemplates(template.programId);
-    if (!details) {
+  async reorderDays(programId: string, orderedIds: string[]): Promise<void> {
+    const details = await programRepository.getWithTemplates(programId);
+    if (!details || orderedIds.length === 0) {
       return;
     }
 
-    const list = details.templates.map((item) => item.template);
-    const index = list.findIndex((item) => item.id === templateId);
-    const swapIndex = index + direction;
-    if (index < 0 || swapIndex < 0 || swapIndex >= list.length) {
-      return;
-    }
-
-    const a = list[index]!;
-    const b = list[swapIndex]!;
+    const byId = new Map(details.templates.map(({ template }) => [template.id, template]));
     const timestamp = nowIso();
-    const updated = list.map((item) => {
-      if (item.id === a.id) {
-        return { ...item, order: b.order, updatedAt: timestamp };
-      }
-      if (item.id === b.id) {
-        return { ...item, order: a.order, updatedAt: timestamp };
-      }
-      return item;
-    });
+    const updated = orderedIds
+      .map((id, index) => {
+        const item = byId.get(id);
+        if (!item) {
+          return null;
+        }
+        return { ...item, order: index + 1, updatedAt: timestamp };
+      })
+      .filter((item): item is WorkoutTemplate => item != null);
+
+    if (updated.length === 0) {
+      return;
+    }
 
     await programRepository.replaceTemplateOrders(updated);
   }

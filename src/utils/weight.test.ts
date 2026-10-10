@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   displayToKg,
+  formatSetGroups,
   formatSetsCompact,
   formatWeight,
   kgToDisplay,
@@ -23,14 +24,18 @@ describe('weight utils', () => {
   });
 
   it('groups adjacent same-weight sets', () => {
-    expect(
-      formatSetsCompact([
-        { weightKg: 50, reps: 12 },
-        { weightKg: 70, reps: 10 },
-        { weightKg: 80, reps: 6 },
-        { weightKg: 80, reps: 6 },
-        { weightKg: 80, reps: 5 },
-      ]),
-    ).toBe('50кг×12 · 70кг×10 · 80кг×6-6-5');
+    const sets = [
+      { weightKg: 50, reps: 12 },
+      { weightKg: 70, reps: 10 },
+      { weightKg: 80, reps: 6 },
+      { weightKg: 80, reps: 6 },
+      { weightKg: 80, reps: 5 },
+    ];
+    expect(formatSetsCompact(sets)).toBe('50кг×12 · 70кг×10 · 80кг×6-6-5');
+    expect(formatSetGroups(sets)).toEqual([
+      '50 кг × 12',
+      '70 кг × 10',
+      '80 кг × 6-6-5',
+    ]);
   });
 });

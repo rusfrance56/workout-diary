@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { TrashIcon } from '../components/icons';
+import { PageBack } from '../components/PageBack';
 import { useProgramsList } from '../hooks/useProgramsEditor';
 
 export function ProgramsPage() {
@@ -38,19 +39,22 @@ export function ProgramsPage() {
 
   return (
     <div className="d-flex flex-column gap-3">
-      <div className="d-flex justify-content-between align-items-end gap-2">
-        <div>
-          <h1 className="page-title mb-1">Программы</h1>
-          <p className="page-subtitle mb-0">Дни и упражнения</p>
+      <header className="page-header">
+        <PageBack />
+        <div className="d-flex justify-content-between align-items-end gap-2">
+          <div>
+            <h1 className="page-title mb-1">Программы</h1>
+            <p className="page-subtitle mb-0">Дни и упражнения</p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary touch-btn"
+            onClick={() => setShowForm((value) => !value)}
+          >
+            {showForm ? 'Отмена' : 'Создать'}
+          </button>
         </div>
-        <button
-          type="button"
-          className="btn btn-primary touch-btn"
-          onClick={() => setShowForm((value) => !value)}
-        >
-          {showForm ? 'Отмена' : 'Создать'}
-        </button>
-      </div>
+      </header>
 
       {showForm && (
         <form className="card border-0" onSubmit={(event) => void handleCreate(event)}>
